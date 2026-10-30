@@ -9,14 +9,16 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/">▲ Northwind</a>
+    <a class="brand" href="/index.php">▲ Northwind</a>
     <nav>
-      <form class="searchbar" action="/search" method="get">
+      <form class="searchbar" action="/search.php" method="get">
         <input name="q" placeholder="Search products…" aria-label="Search">
       </form>
-      <a href="/cart">Cart</a>
-      <a href="/account">Account</a>
-      <a class="muted" href="/admin">Admin</a>
+      <a href="/shop.php">Shop</a>
+      <a href="/cart.php">Cart</a>
+      <a href="/account.php">Account</a>
+      <a href="/upload.php">Avatar</a>
+      <a class="muted" href="/admin/">Admin</a>
     </nav>
   </header>
   <main>
@@ -24,7 +26,7 @@
   </main>
   <footer>
     <span>Northwind Store — a deliberately-vulnerable demo app.</span>
-    <span class="muted">Synthetic data only · not for production · scanned by <a href="https://murk.sh">MURK</a></span>
+    <span class="muted">Synthetic data · not for production · scanned by <a href="https://murk.sh">MURK</a></span>
   </footer>
 </body>
 </html>

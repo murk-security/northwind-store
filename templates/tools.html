@@ -1,0 +1,12 @@
+<section class="narrow">
+  <h1>Network tools</h1>
+  <p class="muted">Check whether a host is reachable from our servers.</p>
+  <form method="get" action="/tools.php" class="stack">
+    <label>Host
+      <input name="host" value="{{host}}" placeholder="example.com">
+    </label>
+    <button class="btn" type="submit">Ping</button>
+  </form>
+  <pre class="output">{{output}}</pre>
+  <p class="muted"><a href="/admin/">← Admin</a></p>
+</section>

@@ -1,0 +1,26 @@
+<section>
+  <nav class="crumbs"><a href="/shop.php">Shop</a> / {{name}}</nav>
+  <div class="product">
+    <div class="product-img">{{name}}</div>
+    <div class="product-info">
+      <h1>{{name}}</h1>
+      <p class="price">${{price}}</p>
+      <p class="muted">SKU {{sku}}</p>
+      <p>{{blurb}}</p>
+      <a class="btn btn-primary" href="/cart.php">Add to cart</a>
+    </div>
+  </div>
+
+  <section class="reviews">
+    <h2>Reviews</h2>
+    <ul class="results">
+      {{reviews}}
+    </ul>
+    <form method="post" action="/product.php?id={{pid}}" class="stack">
+      <label>Write a review
+        <input name="review" placeholder="Share your thoughts…">
+      </label>
+      <button class="btn" type="submit">Post review</button>
+    </form>
+  </section>
+</section>

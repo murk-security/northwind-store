@@ -1,0 +1,13 @@
+<section class="narrow">
+  <h1>Profile picture</h1>
+  <p>{{msg}}</p>
+  <p>{{link}}</p>
+  <form method="post" action="/upload.php" enctype="multipart/form-data" class="stack">
+    <label>Choose a file
+      <input type="file" name="avatar">
+    </label>
+    <button class="btn btn-primary" type="submit">Upload</button>
+  </form>
+  <p class="muted">Uploaded files appear under <code>/uploads/</code>.</p>
+  <p class="muted"><a href="/index.php">← Back to store</a></p>
+</section>
