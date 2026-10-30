@@ -35,6 +35,8 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
+import hmac
 import html
 import json
 import os
@@ -143,6 +145,15 @@ def _sim_command(cmd: str) -> str:
 
 
 # --- minimal PHP-ish serialization (for the insecure-deserialization fixture) ---
+
+# Server-side signing key for the 'remember' cookie; never disclosed to clients.
+REMEMBER_SECRET = secrets.token_hex(32)
+
+
+def _remember_sig(payload: str) -> str:
+    """HMAC over the serialized identity payload; the cookie carries sig|payload."""
+    return hmac.new(REMEMBER_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
+
 
 def php_serialize_identity(user: str, role: str) -> str:
     return (f'a:2:{{s:4:"user";s:{len(user)}:"{user}";'
@@ -262,10 +273,13 @@ class Handler(BaseHTTPRequestHandler):
         remember = ck.get("remember")
         if remember:
             try:
-                blob = base64.b64decode(remember + "===").decode("utf-8", "replace")
+                raw = base64.b64decode(remember + "===").decode("utf-8", "replace")
+                sig, _, blob = raw.partition("|")
+                if not hmac.compare_digest(sig.encode(), _remember_sig(blob).encode()):
+                    return None, None
             except Exception:
                 return None, None
-            return php_parse_role(blob)  # trusted as-is -> tamperable
+            return php_parse_role(blob)
         return None, None
 
     def do_HEAD(self):
@@ -295,9 +309,12 @@ class Handler(BaseHTTPRequestHandler):
                 extra = {"Set-Cookie": f"PHPSESSID={token}; Path=/; HttpOnly",
                          "Location": "/account.php"}
                 if remember:
-                    # "Remember me" stores a serialized identity cookie, trusted on return.
-                    blob = base64.b64encode(php_serialize_identity(user, role).encode()).decode()
-                    extra["Set-Cookie"] = extra["Set-Cookie"] + f", remember={blob}; Path=/"
+                    # "Remember me" stores a signed identity cookie; the HMAC is
+                    # verified server-side on return, so it cannot be forged.
+                    payload = php_serialize_identity(user, role)
+                    signed = f"{_remember_sig(payload)}|{payload}"
+                    blob = base64.b64encode(signed.encode()).decode()
+                    extra["Set-Cookie"] = extra["Set-Cookie"] + f", remember={blob}; Path=/; HttpOnly"
                 return self._send(303, b"", "text/html", extra=extra)
             return self._send(200, render("login", title="Sign in",
                                           error="Invalid username or password."))
