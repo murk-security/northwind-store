@@ -1,0 +1,17 @@
+<section class="narrow">
+  <h1>Your cart</h1>
+  <p class="muted">Your cart is empty. Have a promo code?</p>
+  <div class="stack">
+    <label>Promo code
+      <input id="promo" placeholder="SAVE10">
+    </label>
+    <!-- BUG: the applied code is written to innerHTML, so markup executes. It
+         only fires after you fill the field and click Apply (an interaction). -->
+    <button class="btn" id="apply"
+      onclick="document.getElementById('promo-result').innerHTML=document.getElementById('promo').value">
+      Apply
+    </button>
+    <div id="promo-result"></div>
+  </div>
+  <p class="muted"><a href="/">← Keep shopping</a></p>
+</section>

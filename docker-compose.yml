@@ -1,0 +1,9 @@
+services:
+  northwind:
+    build: .
+    image: northwind-store:local
+    # Bind to loopback on the host so the vulnerable app is NOT exposed to your
+    # network. Point your scanner at http://localhost:8099.
+    ports:
+      - "127.0.0.1:8099:8099"
+    restart: unless-stopped

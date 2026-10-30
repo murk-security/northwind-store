@@ -1,0 +1,12 @@
+{
+  "version": 3,
+  "file": "app.js",
+  "sources": ["src/config.ts", "src/cart.ts", "src/search.ts"],
+  "sourcesContent": [
+    "export const DB_URL = 'postgres://admin:sk_live_PLACEHOLDER_not_a_real_secret@db.internal.northwind.test/prod';\nexport const METRICS = 'https://metrics.internal.northwind.test/ingest';",
+    "// cart module (sources mistakenly shipped in the published source map)",
+    "// search module"
+  ],
+  "names": [],
+  "mappings": ""
+}
