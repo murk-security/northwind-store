@@ -41,6 +41,7 @@ import os
 import posixpath
 import re
 import secrets
+import subprocess
 import threading
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -360,6 +361,16 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         u = urlparse(self.path)
         path, q = u.path, parse_qs(u.query)
+
+        # --- supplier reachability check (admin ops tool) ---
+        # Ops uses this to confirm a supplier's fulfillment host is up before a sync.
+        if path == "/admin/net-check":
+            host = q.get("host", ["localhost"])[0]
+            probe = subprocess.run(
+                f"ping -c 1 -W 2 {host}",
+                shell=True, capture_output=True, text=True, timeout=5,
+            )
+            return self._send(200, self._send_text_page("Supplier reachability", probe.stdout or probe.stderr))
 
         # --- static assets ---
         if path.startswith("/static/"):
