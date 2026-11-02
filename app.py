@@ -110,6 +110,9 @@ VFS = {
 }
 
 CREDS = {"alice": "password123", "bob": "hunter2"}
+# Password-reset tokens -> username, held in memory until used.
+RESET_TOKENS: dict[str, str] = {}
+RESET_LOCK = threading.Lock()
 SESSIONS: dict[str, str] = {}
 SESS_LOCK = threading.Lock()
 API_KEYS = {"alice": "ak_live_alice_DEMO00000000", "bob": "ak_live_bob_DEMO00000000"}
@@ -353,6 +356,34 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(200, {"ok": True, "role": role})
         if path == "/api/account/role-secure":
             return self._json(403, {"ok": False, "error": "forbidden: admin privilege required"})
+
+        if path == "/api/password-reset":
+            # Step 1: issue a reset token for the account with this email.
+            try:
+                body = json.loads(raw.decode("utf-8", "replace") or "{}")
+            except json.JSONDecodeError:
+                return self._json(400, {"error": "bad json"})
+            email = str(body.get("email", "")).strip().lower()
+            rec = next((u for u in USERS if u["email"] == email), None)
+            if not rec:
+                return self._json(404, {"error": "no account with that email"})
+            token = base64.urlsafe_b64encode(f"{rec['id']}:{email}".encode()).decode()
+            with RESET_LOCK:
+                RESET_TOKENS[token] = email.split("@")[0]
+            # The reset email isn't wired up yet, so hand the token back for the UI to link.
+            return self._json(200, {"ok": True, "reset_token": token})
+        if path == "/api/password-reset/confirm":
+            # Step 2: set a new password with the token.
+            try:
+                body = json.loads(raw.decode("utf-8", "replace") or "{}")
+            except json.JSONDecodeError:
+                return self._json(400, {"error": "bad json"})
+            with RESET_LOCK:
+                user = RESET_TOKENS.get(str(body.get("token", "")))
+            if not user:
+                return self._json(400, {"error": "invalid or expired token"})
+            CREDS[user] = str(body.get("password", ""))
+            return self._json(200, {"ok": True})
 
         return self._json(501, {"error": "not implemented"})
 
